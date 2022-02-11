@@ -9,7 +9,7 @@ import {
   ListItem,
   ListItemText,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import { Bar } from 'react-chartjs-2';
 import axios from 'axios';
 import dynamic from 'next/dynamic';
@@ -19,7 +19,7 @@ import Layout from '../../components/Layout';
 import { getError } from '../../utils/error';
 import { Store } from '../../utils/Store';
 import NextLink from 'next/link';
-import useStyles from '../../utils/styles';
+import classes from '../../utils/classes';
 
 import {
   Chart as ChartJS,
@@ -57,7 +57,6 @@ const reducer = (state, action) => {
 };
 
 const AdminDashboard = () => {
-  const classes = useStyles();
   const router = useRouter();
   const { state } = useContext(Store);
   const { userInfo } = state;
@@ -91,7 +90,7 @@ const AdminDashboard = () => {
     <Layout title="Admin Dashboard">
       <Grid container spacing={1}>
         <Grid item md={3} xs={12}>
-          <Card className={classes.section}>
+          <Card sx={classes.section}>
             <List>
               <NextLink href="/admin/dashboard" passHref>
                 <ListItem selected button component="a">
@@ -117,13 +116,13 @@ const AdminDashboard = () => {
           </Card>
         </Grid>
         <Grid item md={9} xs={12}>
-          <Card className={classes.section}>
+          <Card sx={classes.section}>
             <List>
               <ListItem>
                 {loading ? (
                   <CircularProgress />
                 ) : error ? (
-                  <Typography className={classes.error}>{error}</Typography>
+                  <Typography sx={classes.error}>{error}</Typography>
                 ) : (
                   <Grid container spacing={5}>
                     <Grid item md={3}>

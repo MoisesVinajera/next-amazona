@@ -1,71 +1,63 @@
+import axios from 'axios';
+import dynamic from 'next/dynamic';
+import { useRouter } from 'next/router';
+import NextLink from 'next/link';
+import React, { useEffect, useContext, useReducer } from 'react';
 import {
-  Button,
-  Card,
   CircularProgress,
   Grid,
   List,
   ListItem,
+  Typography,
+  Card,
+  Button,
   ListItemText,
-  Table,
-  TableBody,
-  TableCell,
   TableContainer,
+  Table,
   TableHead,
   TableRow,
-  Typography,
-} from '@material-ui/core';
-import axios from 'axios';
-import dynamic from 'next/dynamic';
-import { useRouter } from 'next/router';
-import React, { useEffect, useContext, useReducer } from 'react';
-import Layout from '../../components/Layout';
+  TableCell,
+  TableBody,
+} from '@mui/material';
 import { getError } from '../../utils/error';
 import { Store } from '../../utils/Store';
-import NextLink from 'next/link';
-import useStyles from '../../utils/styles';
+import Layout from '../../components/Layout';
+import classes from '../../utils/classes';
 import { useSnackbar } from 'notistack';
 
-const reducer = (state, action) => {
+function reducer(state, action) {
   switch (action.type) {
-    case 'FETCH_REQUEST': {
+    case 'FETCH_REQUEST':
       return { ...state, loading: true, error: '' };
-    }
-    case 'FETCH_SUCCESS': {
+    case 'FETCH_SUCCESS':
       return { ...state, loading: false, users: action.payload, error: '' };
-    }
-    case 'FETCH_FAIL': {
+    case 'FETCH_FAIL':
       return { ...state, loading: false, error: action.payload };
-    }
-    case 'DELETE_REQUEST': {
+
+    case 'DELETE_REQUEST':
       return { ...state, loadingDelete: true };
-    }
-    case 'DELETE_SUCCESS': {
+    case 'DELETE_SUCCESS':
       return { ...state, loadingDelete: false, successDelete: true };
-    }
-    case 'DELETE_FAIL': {
+    case 'DELETE_FAIL':
       return { ...state, loadingDelete: false };
-    }
-    case 'DELETE_RESET': {
+    case 'DELETE_RESET':
       return { ...state, loadingDelete: false, successDelete: false };
-    }
     default:
       state;
   }
-};
+}
 
-const AdminUsers = () => {
-  const classes = useStyles();
-  const router = useRouter();
+function AdminUsers() {
   const { state } = useContext(Store);
-  const { userInfo } = state;
-  const { enqueueSnackbar } = useSnackbar();
+  const router = useRouter();
 
-  const [{ loading, error, users, loadingDelete, successDelete }, dispatch] =
+  const { userInfo } = state;
+
+  const [{ loading, error, users, successDelete, loadingDelete }, dispatch] =
     useReducer(reducer, {
       loading: true,
       users: [],
       error: '',
-      loadingCreate: false,
     });
 
   useEffect(() => {
@@ -76,9 +68,7 @@ const AdminUsers = () => {
       try {
         dispatch({ type: 'FETCH_REQUEST' });
         const { data } = await axios.get(`/api/admin/users`, {
-          headers: {
-            authorization: `Bearer ${userInfo.token}`,
-          },
+          headers: { authorization: `Bearer ${userInfo.token}` },
         });
         dispatch({ type: 'FETCH_SUCCESS', payload: data });
       } catch (err) {
@@ -92,6 +82,8 @@ const AdminUsers = () => {
     }
   }, [successDelete]);
 
+  const { enqueueSnackbar } = useSnackbar();
+
   const deleteHandler = async (userId) => {
     if (!window.confirm('Are you sure?')) {
       return;
@@ -99,9 +91,7 @@ const AdminUsers = () => {
     try {
       dispatch({ type: 'DELETE_REQUEST' });
       await axios.delete(`/api/admin/users/${userId}`, {
-        headers: {
-          authorization: `Bearer ${userInfo.token}`,
-        },
+        headers: { authorization: `Bearer ${userInfo.token}` },
       });
       dispatch({ type: 'DELETE_SUCCESS' });
       enqueueSnackbar('User deleted successfully', { variant: 'success' });
@@ -114,7 +104,7 @@ const AdminUsers = () => {
     <Layout title="Users">
       <Grid container spacing={1}>
         <Grid item md={3} xs={12}>
-          <Card className={classes.section}>
+          <Card sx={classes.section}>
             <List>
               <NextLink href="/admin/dashboard" passHref>
                 <ListItem button component="a">
@@ -140,7 +130,7 @@ const AdminUsers = () => {
           </Card>
         </Grid>
         <Grid item md={9} xs={12}>
-          <Card className={classes.section}>
+          <Card sx={classes.section}>
             <List>
               <ListItem>
                 <Typography component="h1" variant="h1">
@@ -148,11 +138,12 @@ const AdminUsers = () => {
                 </Typography>
                 {loadingDelete && <CircularProgress />}
               </ListItem>
+
               <ListItem>
                 {loading ? (
                   <CircularProgress />
                 ) : error ? (
-                  <Typography className={classes.error}>{error}</Typography>
+                  <Typography sx={classes.error}>{error}</Typography>
                 ) : (
                   <TableContainer>
                     <Table>
@@ -202,5 +193,6 @@ const AdminUsers = () => {
       </Grid>
     </Layout>
   );
-};
+}
+
 export default dynamic(() => Promise.resolve(AdminUsers), { ssr: false });

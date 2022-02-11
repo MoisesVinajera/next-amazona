@@ -6,7 +6,7 @@ import {
   CardContent,
   CardMedia,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import { Rating } from '@mui/material';
 import NextLink from 'next/link';
 const ProductItem = ({ product, addToCartHandler }) => {

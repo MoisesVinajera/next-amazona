@@ -1,3 +1,10 @@
+import Cookies from 'js-cookie';
+import { useRouter } from 'next/router';
+import React, { useContext, useEffect, useState } from 'react';
+import { Store } from '../utils/Store';
+import Layout from '../components/Layout';
+import Form from '../components/Form';
+import CheckoutWizard from '../components/CheckoutWizard';
 import {
   Button,
   FormControl,
@@ -7,22 +14,14 @@ import {
   Radio,
   RadioGroup,
   Typography,
-} from '@material-ui/core';
-import Cookies from 'js-cookie';
-import { useRouter } from 'next/router';
-import React, { useContext, useEffect, useState } from 'react';
-import CheckoutWizard from '../components/CheckoutWizard';
-import Layout from '../components/Layout';
-import { Store } from '../utils/Store';
-import useStyles from '../utils/styles';
+} from '@mui/material';
 import { useSnackbar } from 'notistack';
 
-const Payment = () => {
-  const classes = useStyles();
+export default function Payment() {
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const router = useRouter();
   const [paymentMethod, setPaymentMethod] = useState('');
   const { state, dispatch } = useContext(Store);
-  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const {
     cart: { shippingAddress },
   } = state;
@@ -32,10 +31,10 @@ const Payment = () => {
     } else {
       setPaymentMethod(Cookies.get('paymentMethod') || '');
     }
-  }, [shippingAddress, router]);
-  const submitHandler = (event) => {
+  }, []);
+  const submitHandler = (e) => {
     closeSnackbar();
-    event.preventDefault();
+    e.preventDefault();
     if (!paymentMethod) {
       enqueueSnackbar('Payment method is required', { variant: 'error' });
     } else {
@@ -47,7 +46,7 @@ const Payment = () => {
   return (
     <Layout title="Payment Method">
       <CheckoutWizard activeStep={2}></CheckoutWizard>
-      <form className={classes.form} onSubmit={submitHandler}>
+      <Form onSubmit={submitHandler}>
         <Typography component="h1" variant="h1">
           Payment Method
         </Typography>
@@ -88,14 +87,14 @@ const Payment = () => {
               fullWidth
               type="button"
               variant="contained"
+              color="secondary"
               onClick={() => router.push('/shipping')}
             >
               Back
             </Button>
           </ListItem>
         </List>
-      </form>
+      </Form>
     </Layout>
   );
-};
-export default Payment;
+}

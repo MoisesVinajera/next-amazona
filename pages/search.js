@@ -7,20 +7,22 @@ import {
   MenuItem,
   Select,
   Typography,
-} from '@material-ui/core';
-import CancelIcon from '@material-ui/icons/Cancel';
+} from '@mui/material';
+import CancelIcon from '@mui/icons-material/Cancel';
 import { useRouter } from 'next/router';
 import React, { useContext } from 'react';
 import Layout from '../components/Layout';
 import db from '../utils/db';
 import Product from '../models/Product';
-import useStyles from '../utils/styles';
+import classes from '../utils/classes';
 import ProductItem from '../components/ProductItem';
 import { Store } from '../utils/Store';
 import axios from 'axios';
-import { Rating } from '@material-ui/lab';
+import Rating from '@mui/material/Rating';
 import { Pagination } from '@mui/material';
+
 const PAGE_SIZE = 3;
+
 const prices = [
   {
     name: '$1 to $50',
@@ -37,9 +39,10 @@ const prices = [
 ];
 
 const ratings = [1, 2, 3, 4, 5];
-const Search = (props) => {
-  const classes = useStyles();
+
+export default function Search(props) {
   const router = useRouter();
+
   const {
     query = 'all',
     category = 'all',
@@ -49,7 +52,7 @@ const Search = (props) => {
     sort = 'featured',
   } = router.query;
   const { products, countProducts, categories, brands, pages } = props;
-  const { state, dispatch } = useContext(Store);
+
   const filterSearch = ({
     page,
     category,
@@ -96,6 +99,8 @@ const Search = (props) => {
   const ratingHandler = (e) => {
     filterSearch({ rating: e.target.value });
   };
+
+  const { state, dispatch } = useContext(Store);
   const addToCartHandler = async (product) => {
     const existItem = state.cart.cartItems.find((x) => x._id === product._id);
     const quantity = existItem ? existItem.quantity + 1 : 1;
@@ -104,16 +109,16 @@ const Search = (props) => {
       window.alert('Sorry. Product is out of stock');
       return;
     }
-    dispatch({ type: 'CARD_ADD_ITEM', payload: { ...product, quantity } });
+    dispatch({ type: 'CART_ADD_ITEM', payload: { ...product, quantity } });
     router.push('/cart');
   };
   return (
     <Layout title="search">
-      <Grid className={classes.mt1} container spacing={1}>
+      <Grid sx={classes.section} container spacing={1}>
         <Grid item md={3}>
           <List>
             <ListItem>
-              <Box className={classes.fullWidth}>
+              <Box sx={classes.fullWidth}>
                 <Typography>Categories</Typography>
                 <Select fullWidth value={category} onChange={categoryHandler}>
                   <MenuItem value="all">All</MenuItem>
@@ -127,9 +132,9 @@ const Search = (props) => {
               </Box>
             </ListItem>
             <ListItem>
-              <Box className={classes.fullWidth}>
+              <Box sx={classes.fullWidth}>
                 <Typography>Brands</Typography>
-                <Select fullWidth value={brand} onChange={brandHandler}>
+                <Select value={brand} onChange={brandHandler} fullWidth>
                   <MenuItem value="all">All</MenuItem>
                   {brands &&
                     brands.map((brand) => (
@@ -141,21 +146,20 @@ const Search = (props) => {
               </Box>
             </ListItem>
             <ListItem>
-              <Box className={classes.fullWidth}>
+              <Box sx={classes.fullWidth}>
                 <Typography>Prices</Typography>
-                <Select fullWidth value={price} onChange={priceHandler}>
+                <Select value={price} onChange={priceHandler} fullWidth>
                   <MenuItem value="all">All</MenuItem>
-                  {prices &&
-                    prices.map((price) => (
-                      <MenuItem key={price.value} value={price.value}>
-                        {price.name}
-                      </MenuItem>
-                    ))}
+                  {prices.map((price) => (
+                    <MenuItem key={price.value} value={price.value}>
+                      {price.name}
+                    </MenuItem>
+                  ))}
                 </Select>
               </Box>
             </ListItem>
             <ListItem>
-              <Box className={classes.fullWidth}>
+              <Box sx={classes.fullWidth}>
                 <Typography>Ratings</Typography>
                 <Select value={rating} onChange={ratingHandler} fullWidth>
                   <MenuItem value="all">All</MenuItem>
@@ -190,7 +194,7 @@ const Search = (props) => {
               ) : null}
             </Grid>
             <Grid item>
-              <Typography component="span" className={classes.sort}>
+              <Typography component="span" sx={classes.sort}>
                 Sort by
               </Typography>
               <Select value={sort} onChange={sortHandler}>
@@ -202,7 +206,7 @@ const Search = (props) => {
               </Select>
             </Grid>
           </Grid>
-          <Grid className={classes.mt1} container spacing={3}>
+          <Grid sx={classes.section} container spacing={3}>
             {products.map((product) => (
               <Grid item md={4} key={product.name}>
                 <ProductItem
@@ -213,7 +217,7 @@ const Search = (props) => {
             ))}
           </Grid>
           <Pagination
-            className={classes.mt1}
+            sx={classes.section}
             defaultPage={parseInt(query.page || '1')}
             count={pages}
             onChange={pageHandler}
@@ -222,9 +226,9 @@ const Search = (props) => {
       </Grid>
     </Layout>
   );
-};
+}
 
-export const getServerSideProps = async ({ query }) => {
+export async function getServerSideProps({ query }) {
   await db.connect();
   const pageSize = query.pageSize || PAGE_SIZE;
   const page = query.page || 1;
@@ -234,6 +238,7 @@ export const getServerSideProps = async ({ query }) => {
   const rating = query.rating || '';
   const sort = query.sort || '';
   const searchQuery = query.query || '';
+
   const queryFilter =
     searchQuery && searchQuery !== 'all'
       ? {
@@ -253,6 +258,7 @@ export const getServerSideProps = async ({ query }) => {
           },
         }
       : {};
+  // 10-50
   const priceFilter =
     price && price !== 'all'
       ? {
@@ -301,6 +307,7 @@ export const getServerSideProps = async ({ query }) => {
     ...ratingFilter,
   });
   await db.disconnect();
+
   const products = productDocs.map(db.convertDocToObj);
 
   return {
@@ -313,5 +320,4 @@ export const getServerSideProps = async ({ query }) => {
       brands,
     },
   };
-};
-export default Search;
+}

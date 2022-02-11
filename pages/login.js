@@ -1,24 +1,24 @@
 import {
-  Button,
-  Link,
   List,
   ListItem,
-  TextField,
   Typography,
-} from '@material-ui/core';
+  TextField,
+  Button,
+  Link,
+} from '@mui/material';
+import axios from 'axios';
+import { useRouter } from 'next/router';
+import NextLink from 'next/link';
 import React, { useContext, useEffect } from 'react';
 import Layout from '../components/Layout';
-import useStyles from '../utils/styles';
-import NextLink from 'next/link';
-import axios from 'axios';
 import { Store } from '../utils/Store';
-import { useRouter } from 'next/router';
-import { Controller, useForm } from 'react-hook-form';
 import Cookies from 'js-cookie';
+import { Controller, useForm } from 'react-hook-form';
 import { useSnackbar } from 'notistack';
 import { getError } from '../utils/error';
+import Form from '../components/Form';
 
-const Login = () => {
+export default function Login() {
   const {
     handleSubmit,
     control,
@@ -26,7 +26,7 @@ const Login = () => {
   } = useForm();
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const router = useRouter();
-  const { redirect } = router.query;
+  const { redirect } = router.query; // login?redirect=/shipping
   const { state, dispatch } = useContext(Store);
   const { userInfo } = state;
   useEffect(() => {
@@ -35,7 +35,6 @@ const Login = () => {
     }
   }, []);
 
-  const classes = useStyles();
   const submitHandler = async ({ email, password }) => {
     closeSnackbar();
     try {
@@ -51,8 +50,8 @@ const Login = () => {
     }
   };
   return (
-    <Layout title="login">
-      <form onSubmit={handleSubmit(submitHandler)} className={classes.form}>
+    <Layout title="Login">
+      <Form onSubmit={handleSubmit(submitHandler)}>
         <Typography component="h1" variant="h1">
           Login
         </Typography>
@@ -64,7 +63,7 @@ const Login = () => {
               defaultValue=""
               rules={{
                 required: true,
-                pattern: /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/,
+                pattern: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/,
               }}
               render={({ field }) => (
                 <TextField
@@ -121,14 +120,13 @@ const Login = () => {
             </Button>
           </ListItem>
           <ListItem>
-            Dont have an account? &nbsp;
+            Don&apos;t have an account? &nbsp;
             <NextLink href={`/register?redirect=${redirect || '/'}`} passHref>
               <Link>Register</Link>
             </NextLink>
           </ListItem>
         </List>
-      </form>
+      </Form>
     </Layout>
   );
-};
-export default Login;
+}

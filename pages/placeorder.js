@@ -1,44 +1,41 @@
+import React, { useContext, useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
+import Layout from '../components/Layout';
+import { Store } from '../utils/Store';
+import NextLink from 'next/link';
+import Image from 'next/image';
 import {
   Grid,
-  Table,
-  TableBody,
-  TableCell,
   TableContainer,
-  TableHead,
-  TableRow,
-  Link,
+  Table,
   Typography,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  Link,
+  CircularProgress,
   Button,
   Card,
   List,
   ListItem,
-  CircularProgress,
-} from '@material-ui/core';
-import dynamic from 'next/dynamic';
-import React, { useContext, useEffect, useState } from 'react';
-import Layout from '../components/Layout';
-import NextLink from 'next/link';
-import { Store } from '../utils/Store';
-
-import Image from 'next/image';
+} from '@mui/material';
+import classes from '../utils/classes';
+import axios from 'axios';
 import { useRouter } from 'next/router';
-import useStyles from '../utils/styles';
 import CheckoutWizard from '../components/CheckoutWizard';
 import { useSnackbar } from 'notistack';
 import { getError } from '../utils/error';
-import axios from 'axios';
 import Cookies from 'js-cookie';
 
-const PlaceOrder = () => {
-  const classes = useStyles();
+function PlaceOrder() {
   const router = useRouter();
   const { state, dispatch } = useContext(Store);
-
   const {
-    cart: { cartItems, shippingAddress, paymentMethod },
     userInfo,
+    cart: { cartItems, shippingAddress, paymentMethod },
   } = state;
-  const round2 = (num) => Math.round(num * 100 + Number.EPSILON) / 100;
+  const round2 = (num) => Math.round(num * 100 + Number.EPSILON) / 100; // 123.456 => 123.46
   const itemsPrice = round2(
     cartItems.reduce((a, c) => a + c.price * c.quantity, 0)
   );
@@ -54,7 +51,7 @@ const PlaceOrder = () => {
       router.push('/cart');
     }
   }, []);
-  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  const { closeSnackbar, enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
   const placeOrderHandler = async () => {
     closeSnackbar();
@@ -95,7 +92,7 @@ const PlaceOrder = () => {
 
       <Grid container spacing={1}>
         <Grid item md={9} xs={12}>
-          <Card className={classes.section}>
+          <Card sx={classes.section}>
             <List>
               <ListItem>
                 <Typography component="h2" variant="h2">
@@ -109,7 +106,7 @@ const PlaceOrder = () => {
               </ListItem>
             </List>
           </Card>
-          <Card className={classes.section}>
+          <Card sx={classes.section}>
             <List>
               <ListItem>
                 <Typography component="h2" variant="h2">
@@ -119,7 +116,7 @@ const PlaceOrder = () => {
               <ListItem>{paymentMethod}</ListItem>
             </List>
           </Card>
-          <Card className={classes.section}>
+          <Card sx={classes.section}>
             <List>
               <ListItem>
                 <Typography component="h2" variant="h2">
@@ -152,6 +149,7 @@ const PlaceOrder = () => {
                               </Link>
                             </NextLink>
                           </TableCell>
+
                           <TableCell>
                             <NextLink href={`/product/${item.slug}`} passHref>
                               <Link>
@@ -175,7 +173,7 @@ const PlaceOrder = () => {
           </Card>
         </Grid>
         <Grid item md={3} xs={12}>
-          <Card className={classes.section}>
+          <Card sx={classes.section}>
             <List>
               <ListItem>
                 <Typography variant="h2">Order Summary</Typography>
@@ -183,7 +181,7 @@ const PlaceOrder = () => {
               <ListItem>
                 <Grid container>
                   <Grid item xs={6}>
-                    <Typography> Items: </Typography>
+                    <Typography>Items:</Typography>
                   </Grid>
                   <Grid item xs={6}>
                     <Typography align="right">${itemsPrice}</Typography>
@@ -193,7 +191,7 @@ const PlaceOrder = () => {
               <ListItem>
                 <Grid container>
                   <Grid item xs={6}>
-                    <Typography> Tax: </Typography>
+                    <Typography>Tax:</Typography>
                   </Grid>
                   <Grid item xs={6}>
                     <Typography align="right">${taxPrice}</Typography>
@@ -203,7 +201,7 @@ const PlaceOrder = () => {
               <ListItem>
                 <Grid container>
                   <Grid item xs={6}>
-                    <Typography> Shipping: </Typography>
+                    <Typography>Shipping:</Typography>
                   </Grid>
                   <Grid item xs={6}>
                     <Typography align="right">${shippingPrice}</Typography>
@@ -245,6 +243,6 @@ const PlaceOrder = () => {
       </Grid>
     </Layout>
   );
-};
+}
 
 export default dynamic(() => Promise.resolve(PlaceOrder), { ssr: false });

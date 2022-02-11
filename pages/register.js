@@ -1,24 +1,24 @@
 import {
-  Button,
-  Link,
   List,
   ListItem,
-  TextField,
   Typography,
-} from '@material-ui/core';
+  TextField,
+  Button,
+  Link,
+} from '@mui/material';
+import axios from 'axios';
+import { useRouter } from 'next/router';
+import NextLink from 'next/link';
 import React, { useContext, useEffect } from 'react';
 import Layout from '../components/Layout';
-import useStyles from '../utils/styles';
-import NextLink from 'next/link';
-import axios from 'axios';
 import { Store } from '../utils/Store';
-import { useRouter } from 'next/router';
 import Cookies from 'js-cookie';
 import { Controller, useForm } from 'react-hook-form';
 import { useSnackbar } from 'notistack';
 import { getError } from '../utils/error';
+import Form from '../components/Form';
 
-const Register = () => {
+export default function Register() {
   const {
     handleSubmit,
     control,
@@ -34,12 +34,10 @@ const Register = () => {
       router.push('/');
     }
   }, []);
-
-  const classes = useStyles();
   const submitHandler = async ({ name, email, password, confirmPassword }) => {
     closeSnackbar();
     if (password !== confirmPassword) {
-      enqueueSnackbar('Password dont match', { variant: 'error' });
+      enqueueSnackbar("Passwords don't match", { variant: 'error' });
       return;
     }
     try {
@@ -57,7 +55,7 @@ const Register = () => {
   };
   return (
     <Layout title="Register">
-      <form onSubmit={handleSubmit(submitHandler)} className={classes.form}>
+      <Form onSubmit={handleSubmit(submitHandler)}>
         <Typography component="h1" variant="h1">
           Register
         </Typography>
@@ -98,7 +96,7 @@ const Register = () => {
               defaultValue=""
               rules={{
                 required: true,
-                pattern: /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/,
+                pattern: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/,
               }}
               render={({ field }) => (
                 <TextField
@@ -170,7 +168,7 @@ const Register = () => {
                     errors.confirmPassword
                       ? errors.confirmPassword.type === 'minLength'
                         ? 'Confirm Password length is more than 5'
-                        : 'Confirm Password is required'
+                        : 'Confirm  Password is required'
                       : ''
                   }
                   {...field}
@@ -190,8 +188,7 @@ const Register = () => {
             </NextLink>
           </ListItem>
         </List>
-      </form>
+      </Form>
     </Layout>
   );
-};
-export default Register;
+}

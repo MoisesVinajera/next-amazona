@@ -1,82 +1,70 @@
+import axios from 'axios';
+import dynamic from 'next/dynamic';
+import { useRouter } from 'next/router';
+import NextLink from 'next/link';
+import React, { useEffect, useContext, useReducer } from 'react';
 import {
-  Button,
-  Card,
   CircularProgress,
   Grid,
   List,
   ListItem,
+  Typography,
+  Card,
+  Button,
   ListItemText,
-  Table,
-  TableBody,
-  TableCell,
   TableContainer,
+  Table,
   TableHead,
   TableRow,
-  Typography,
-} from '@material-ui/core';
-import axios from 'axios';
-import dynamic from 'next/dynamic';
-import { useRouter } from 'next/router';
-import React, { useEffect, useContext, useReducer } from 'react';
-import Layout from '../../components/Layout';
+  TableCell,
+  TableBody,
+} from '@mui/material';
 import { getError } from '../../utils/error';
 import { Store } from '../../utils/Store';
-import NextLink from 'next/link';
-import useStyles from '../../utils/styles';
+import Layout from '../../components/Layout';
+import classes from '../../utils/classes';
 import { useSnackbar } from 'notistack';
 
-const reducer = (state, action) => {
+function reducer(state, action) {
   switch (action.type) {
-    case 'FETCH_REQUEST': {
+    case 'FETCH_REQUEST':
       return { ...state, loading: true, error: '' };
-    }
-    case 'FETCH_SUCCESS': {
+    case 'FETCH_SUCCESS':
       return { ...state, loading: false, products: action.payload, error: '' };
-    }
-    case 'FETCH_FAIL': {
+    case 'FETCH_FAIL':
       return { ...state, loading: false, error: action.payload };
-    }
-    case 'CREATE_REQUEST': {
+    case 'CREATE_REQUEST':
       return { ...state, loadingCreate: true };
-    }
-    case 'CREATE_SUCCESS': {
+    case 'CREATE_SUCCESS':
       return { ...state, loadingCreate: false };
-    }
-    case 'CREATE_FAIL': {
+    case 'CREATE_FAIL':
       return { ...state, loadingCreate: false };
-    }
-    case 'DELETE_REQUEST': {
+    case 'DELETE_REQUEST':
       return { ...state, loadingDelete: true };
-    }
-    case 'DELETE_SUCCESS': {
+    case 'DELETE_SUCCESS':
       return { ...state, loadingDelete: false, successDelete: true };
-    }
-    case 'DELETE_FAIL': {
+    case 'DELETE_FAIL':
       return { ...state, loadingDelete: false };
-    }
-    case 'DELETE_RESET': {
+    case 'DELETE_RESET':
       return { ...state, loadingDelete: false, successDelete: false };
-    }
     default:
       state;
   }
-};
+}
 
-const AdminProducts = () => {
-  const classes = useStyles();
-  const router = useRouter();
+function AdminProdcuts() {
   const { state } = useContext(Store);
+  const router = useRouter();
+
   const { userInfo } = state;
-  const { enqueueSnackbar } = useSnackbar();
 
   const [
-    { loading, error, products, loadingCreate, loadingDelete, successDelete },
+    { loading, error, products, loadingCreate, successDelete, loadingDelete },
     dispatch,
   ] = useReducer(reducer, {
     loading: true,
     products: [],
     error: '',
-    loadingCreate: false,
   });
 
   useEffect(() => {
@@ -87,9 +75,7 @@ const AdminProducts = () => {
       try {
         dispatch({ type: 'FETCH_REQUEST' });
         const { data } = await axios.get(`/api/admin/products`, {
-          headers: {
-            authorization: `Bearer ${userInfo.token}`,
-          },
+          headers: { authorization: `Bearer ${userInfo.token}` },
         });
         dispatch({ type: 'FETCH_SUCCESS', payload: data });
       } catch (err) {
@@ -102,6 +88,8 @@ const AdminProducts = () => {
       fetchData();
     }
   }, [successDelete]);
+
+  const { enqueueSnackbar } = useSnackbar();
   const createHandler = async () => {
     if (!window.confirm('Are you sure?')) {
       return;
@@ -109,12 +97,10 @@ const AdminProducts = () => {
     try {
       dispatch({ type: 'CREATE_REQUEST' });
       const { data } = await axios.post(
-        '/api/admin/products',
+        `/api/admin/products`,
         {},
         {
-          headers: {
-            authorization: `Bearer ${userInfo.token}`,
-          },
+          headers: { authorization: `Bearer ${userInfo.token}` },
         }
       );
       dispatch({ type: 'CREATE_SUCCESS' });
@@ -132,9 +118,7 @@ const AdminProducts = () => {
     try {
       dispatch({ type: 'DELETE_REQUEST' });
       await axios.delete(`/api/admin/products/${productId}`, {
-        headers: {
-          authorization: `Bearer ${userInfo.token}`,
-        },
+        headers: { authorization: `Bearer ${userInfo.token}` },
       });
       dispatch({ type: 'DELETE_SUCCESS' });
       enqueueSnackbar('Product deleted successfully', { variant: 'success' });
@@ -144,10 +128,10 @@ const AdminProducts = () => {
     }
   };
   return (
-    <Layout title="Admin Dashboard">
+    <Layout title="Products">
       <Grid container spacing={1}>
         <Grid item md={3} xs={12}>
-          <Card className={classes.section}>
+          <Card sx={classes.section}>
             <List>
               <NextLink href="/admin/dashboard" passHref>
                 <ListItem button component="a">
@@ -173,7 +157,7 @@ const AdminProducts = () => {
           </Card>
         </Grid>
         <Grid item md={9} xs={12}>
-          <Card className={classes.section}>
+          <Card sx={classes.section}>
             <List>
               <ListItem>
                 <Grid container alignItems="center">
@@ -195,11 +179,12 @@ const AdminProducts = () => {
                   </Grid>
                 </Grid>
               </ListItem>
+
               <ListItem>
                 {loading ? (
                   <CircularProgress />
                 ) : error ? (
-                  <Typography className={classes.error}>{error}</Typography>
+                  <Typography sx={classes.error}>{error}</Typography>
                 ) : (
                   <TableContainer>
                     <Table>
@@ -230,7 +215,11 @@ const AdminProducts = () => {
                                 href={`/admin/product/${product._id}`}
                                 passHref
                               >
-                                <Button size="small" variant="contained">
+                                <Button
+                                  size="small"
+                                  variant="contained"
+                                  color="secondary"
+                                >
                                   Edit
                                 </Button>
                               </NextLink>{' '}
@@ -238,6 +227,7 @@ const AdminProducts = () => {
                                 onClick={() => deleteHandler(product._id)}
                                 size="small"
                                 variant="contained"
+                                color="error"
                               >
                                 Delete
                               </Button>
@@ -255,5 +245,6 @@ const AdminProducts = () => {
       </Grid>
     </Layout>
   );
-};
-export default dynamic(() => Promise.resolve(AdminProducts), { ssr: false });
+}
+
+export default dynamic(() => Promise.resolve(AdminProdcuts), { ssr: false });

@@ -1,31 +1,29 @@
-import {
-  Button,
-  Card,
-  Grid,
-  List,
-  ListItem,
-  ListItemText,
-  TextField,
-  Typography,
-} from '@material-ui/core';
 import axios from 'axios';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
-import React, { useEffect, useContext } from 'react';
-import Layout from '../components/Layout';
-import { Store } from '../utils/Store';
 import NextLink from 'next/link';
-import useStyles from '../utils/styles';
+import React, { useEffect, useContext } from 'react';
+import {
+  Grid,
+  List,
+  ListItem,
+  Typography,
+  Card,
+  Button,
+  ListItemText,
+  TextField,
+} from '@mui/material';
+import { getError } from '../utils/error';
+import Form from '../components/Form';
+import { Store } from '../utils/Store';
+import Layout from '../components/Layout';
+import classes from '../utils/classes';
 import { Controller, useForm } from 'react-hook-form';
 import { useSnackbar } from 'notistack';
 import Cookies from 'js-cookie';
-import { getError } from '../utils/error';
 
-const Profile = () => {
-  const classes = useStyles();
-  const router = useRouter();
+function Profile() {
   const { state, dispatch } = useContext(Store);
-  const { userInfo } = state;
   const {
     handleSubmit,
     control,
@@ -33,6 +31,8 @@ const Profile = () => {
     setValue,
   } = useForm();
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  const router = useRouter();
+  const { userInfo } = state;
 
   useEffect(() => {
     if (!userInfo) {
@@ -44,7 +44,7 @@ const Profile = () => {
   const submitHandler = async ({ name, email, password, confirmPassword }) => {
     closeSnackbar();
     if (password !== confirmPassword) {
-      enqueueSnackbar('Password dont match', { variant: 'error' });
+      enqueueSnackbar("Passwords don't match", { variant: 'error' });
       return;
     }
     try {
@@ -55,14 +55,11 @@ const Profile = () => {
           email,
           password,
         },
-        {
-          headers: {
-            authorization: `Bearer ${userInfo.token}`,
-          },
-        }
+        { headers: { authorization: `Bearer ${userInfo.token}` } }
       );
       dispatch({ type: 'USER_LOGIN', payload: data });
       Cookies.set('userInfo', JSON.stringify(data));
+
       enqueueSnackbar('Profile updated successfully', { variant: 'success' });
     } catch (err) {
       enqueueSnackbar(getError(err), { variant: 'error' });
@@ -72,7 +69,7 @@ const Profile = () => {
     <Layout title="Profile">
       <Grid container spacing={1}>
         <Grid item md={3} xs={12}>
-          <Card className={classes.section}>
+          <Card sx={classes.section}>
             <List>
               <NextLink href="/profile" passHref>
                 <ListItem selected button component="a">
@@ -88,7 +85,7 @@ const Profile = () => {
           </Card>
         </Grid>
         <Grid item md={9} xs={12}>
-          <Card className={classes.section}>
+          <Card sx={classes.section}>
             <List>
               <ListItem>
                 <Typography component="h1" variant="h1">
@@ -96,10 +93,7 @@ const Profile = () => {
                 </Typography>
               </ListItem>
               <ListItem>
-                <form
-                  onSubmit={handleSubmit(submitHandler)}
-                  className={classes.form}
-                >
+                <Form onSubmit={handleSubmit(submitHandler)}>
                   <List>
                     <ListItem>
                       <Controller
@@ -137,7 +131,7 @@ const Profile = () => {
                         defaultValue=""
                         rules={{
                           required: true,
-                          pattern: /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/,
+                          pattern: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/,
                         }}
                         render={({ field }) => (
                           <TextField
@@ -208,7 +202,7 @@ const Profile = () => {
                             inputProps={{ type: 'password' }}
                             error={Boolean(errors.confirmPassword)}
                             helperText={
-                              errors.confirmPassword
+                              errors.password
                                 ? 'Confirm Password length is more than 5'
                                 : ''
                             }
@@ -228,7 +222,7 @@ const Profile = () => {
                       </Button>
                     </ListItem>
                   </List>
-                </form>
+                </Form>
               </ListItem>
             </List>
           </Card>
@@ -236,5 +230,6 @@ const Profile = () => {
       </Grid>
     </Layout>
   );
-};
+}
+
 export default dynamic(() => Promise.resolve(Profile), { ssr: false });

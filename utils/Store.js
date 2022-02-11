@@ -11,7 +11,7 @@ const initialState = {
       : [],
     shippingAddress: Cookies.get('shippingAddress')
       ? JSON.parse(Cookies.get('shippingAddress'))
-      : {},
+      : { location: {} },
     paymentMethod: Cookies.get('paymentMethod')
       ? Cookies.get('paymentMethod')
       : '',
@@ -27,7 +27,7 @@ const reducer = (state, action) => {
       return { ...state, darkMode: true };
     case 'DARK_MODE_OFF':
       return { ...state, darkMode: false };
-    case 'CARD_ADD_ITEM': {
+    case 'CART_ADD_ITEM': {
       const newItem = action.payload;
       const existItem = state.cart.cartItems.find(
         (item) => item._id === newItem._id
@@ -40,7 +40,8 @@ const reducer = (state, action) => {
       Cookies.set('cartItems', JSON.stringify(cartItems));
       return { ...state, cart: { ...state.cart, cartItems } };
     }
-    case 'CARD_REMOVE_ITEM': {
+
+    case 'CART_REMOVE_ITEM': {
       const cartItems = state.cart.cartItems.filter(
         (item) => item._id !== action.payload._id
       );
@@ -50,7 +51,22 @@ const reducer = (state, action) => {
     case 'SAVE_SHIPPING_ADDRESS': {
       return {
         ...state,
-        cart: { ...state.cart, shippingAddress: action.payload },
+        cart: {
+          ...state.cart,
+          shippingAddress: { ...state.cart.shippingAddress, ...action.payload },
+        },
+      };
+    }
+    case 'SAVE_SHIPPING_ADDRESS_MAP_LOCATION': {
+      return {
+        ...state,
+        cart: {
+          ...state.cart,
+          shippingAddress: {
+            ...state.cart.shippingAddress,
+            location: action.payload,
+          },
+        },
       };
     }
     case 'SAVE_PAYMENT_METHOD': {
@@ -72,7 +88,11 @@ const reducer = (state, action) => {
       return {
         ...state,
         userInfo: null,
-        cart: { cartItems: [], shippingAddress: {}, paymentMethod: '' },
+        cart: {
+          cartItems: [],
+          shippingAddress: { location: {} },
+          paymentMethod: '',
+        },
       };
     }
     default:
